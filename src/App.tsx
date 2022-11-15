@@ -1,26 +1,28 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useEffect } from 'react'
+import { Route, Routes } from 'react-router-dom'
+import { AuthPage } from './pages/AuthPage'
+import { MainPage } from './pages/MainPage/MainPage'
+import { autoLogin } from './store/authSlice'
+import { RootState } from './store/store'
+import { useAppDispatch, useAppSelector } from './store/_hooks'
 
 function App() {
+  const dispatch = useAppDispatch()
+  const { token } = useAppSelector((state: RootState) => state.auth)
+  let routes = <Route element={<MainPage />} path="/" />
+
+  useEffect(() => {
+    dispatch(autoLogin())
+  }, [dispatch, token])
+  if (!token) {
+    routes = <Route element={<AuthPage />} path="/" />
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <>
+      <Routes>{routes}</Routes>
+    </>
+  )
 }
 
-export default App;
+export default App
