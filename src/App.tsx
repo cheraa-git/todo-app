@@ -1,28 +1,26 @@
-import { useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { AuthPage } from './pages/AuthPage'
 import { MainPage } from './pages/MainPage/MainPage'
-import { autoLogin } from './store/authSlice'
-import { RootState } from './store/store'
-import { useAppDispatch, useAppSelector } from './store/_hooks'
+import { useAuthInit } from "./hooks/useAuthInit"
+import { Loader } from "./components/Loader/Loader"
 
 function App() {
-  const dispatch = useAppDispatch()
-  const { token } = useAppSelector((state: RootState) => state.auth)
-  let routes = <Route element={<MainPage />} path="/" />
+  const authStatus = useAuthInit()
 
-  useEffect(() => {
-    dispatch(autoLogin())
-  }, [dispatch, token])
-  if (!token) {
-    routes = <Route element={<AuthPage />} path="/" />
+  let routes = <Route element={<MainPage/>} path="/"/>
+
+  if (authStatus === 'non-auth') {
+    routes = <Route element={<AuthPage/>} path="/"/>
+  } else if (authStatus === 'loading') {
+    routes = <Route element={<Loader/>} path={'/'}/>
   }
+
 
   return (
     <>
       <Routes>{routes}</Routes>
     </>
   )
-}
+  }
 
-export default App
+  export default App

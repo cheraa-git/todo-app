@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { addTodo, fetchTodos, setTodoStatus } from './actions/todoActions'
-import { Todo } from './interfaces'
+import { addTodo, clearCompletedTodos, fetchTodos, setTodoStatus } from '../actions/todoActions'
+import { Todo } from '../interfaces'
 
 interface todoState {
   todos: Todo[]
@@ -20,15 +20,18 @@ export const todoSlice = createSlice({
   name: 'todo',
   initialState,
   reducers: {
-    setLoading: state => {
+    setLoading: (state) => {
       state.loading = !state.loading
     },
     setTodoCategory: (state, { payload }) => {
       state.category = payload
     },
+    hideTodo: (state, { payload }) => {
+
+    }
   },
   extraReducers(builder) {
-    // ADD TODO
+    // ADD_TODO
     builder.addCase(addTodo.pending, state => {
       state.loading = true
     })
@@ -56,25 +59,38 @@ export const todoSlice = createSlice({
       state.loading = false
     })
 
-    // SET TODO STATUS
+    // SET TODO_STATUS
     builder.addCase(setTodoStatus.pending, state => {
       state.loading = true
     })
     builder.addCase(setTodoStatus.fulfilled, (state, { payload }) => {
+
+      // TODO: after setting the todo status, hide the todo (if category !== 'all') after 5 seconds of timeout
+
       state.todos.forEach(todo => {
         if (todo.id === payload.id) {
           todo.done = payload.done
         }
       })
       state.loading = false
+      // setTimeout(() => {
+      if (state.category !== 'all') {
+        state.todos = state.todos.filter(todo => todo.id !== payload.id)
+      }
+      // }, 2000)
     })
-
     builder.addCase(setTodoStatus.rejected, (state, { error }) => {
       state.error = 'Fetch todos error: ' + error.message
       console.log('Fetch todos error:', error)
       state.loading = false
     })
+
+    // CLEAR COMPLETED TODOS
+    builder.addCase(clearCompletedTodos.fulfilled, (state, { payload }) => {
+      state.todos = state.todos.filter(todo => !payload?.includes(todo.id))
+    })
   },
+
 })
 
 export const { setLoading, setTodoCategory } = todoSlice.actions

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { loginUser, registerUser } from '../store/actions/authActions'
-import { setError } from '../store/authSlice'
+import { setError } from '../store/slices/authSlice'
 import { RootState } from '../store/store'
-import { useAppDispatch, useAppSelector } from '../store/_hooks'
+import { useAppDispatch, useAppSelector } from '../store/store'
+import { Loader } from "../components/Loader/Loader"
 
 export const AuthPage: React.FC = () => {
   const dispatch = useAppDispatch()
-  const { error } = useAppSelector((state: RootState) => state.auth)
-
+  const { error, loading } = useAppSelector((state: RootState) => state.auth)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [email, setEmail] = useState('')
@@ -21,7 +21,7 @@ export const AuthPage: React.FC = () => {
 
   const registerHandler = () => {
     if (password && email && password === confirmPassword) {
-      dispatch(registerUser({ email, password }))
+      dispatch(registerUser(email, password))
     } else {
       alert('Данные некорректны')
     }
@@ -29,7 +29,7 @@ export const AuthPage: React.FC = () => {
 
   const loginHandler = () => {
     if (password && email) {
-      dispatch(loginUser({ email, password }))
+      dispatch(loginUser(email, password))
     } else {
       alert('Данные некорректны')
     }
@@ -91,7 +91,7 @@ export const AuthPage: React.FC = () => {
         <h1 className="display-6">Вход</h1>
         <div className="mb-3">
           <label className="lead form-label">E-mail</label>
-          <input className="form-control" value={email} onChange={e => setEmail(e.target.value)} required />
+          <input className="form-control" value={email} onChange={e => setEmail(e.target.value)} required/>
         </div>
 
         <div className="mb-3">
@@ -105,9 +105,12 @@ export const AuthPage: React.FC = () => {
             required
           />
         </div>
-        <button className="btn btn-primary" onClick={loginHandler}>
-          Войти
-        </button>
+        {
+          loading
+            ? <Loader/>
+            : <button className="btn btn-primary" onClick={loginHandler}>Войти</button>
+        }
+
         <button className="btn btn-link" onClick={() => setMode('register')}>
           Регистрация
         </button>
