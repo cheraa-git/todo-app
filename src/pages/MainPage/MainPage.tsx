@@ -28,7 +28,7 @@ export const MainPage: React.FC = () => {
       </div>
       <div className="container">
         <h1 className="main-page__title">todos</h1>
-        <button onClick={() => dispatch(fetchTodos_(uid))}>test</button>
+        {/*<button onClick={() => dispatch(fetchTodos_(uid))}>test</button>*/}
         <TodoCard/>
       </div>
     </div>
