@@ -70,7 +70,7 @@ export const ItemConfig: React.FC<ItemConfigProps> = ({ currentTodo, onClose }) 
 
       <p>Дата завершения</p>
       <div className="item-config__input">
-        <input type="datetime-local" value={completionDate} onChange={(e) => setCompletionDate(e.target.value)}/>
+        <input type="datetime-local"  value={completionDate} onChange={(e) => setCompletionDate(e.target.value)}/>
         <i className="bi bi-x" onClick={() => setCompletionDate('')}/>
       </div>
 

@@ -117,7 +117,7 @@ export const TodoCard: React.FC = () => {
                 />
 
                 <div className="fullWidth">
-                  <p onClick={() => setCurrentTodo(item)}>{item.title} </p>
+                  <p className="item-title" onClick={() => setCurrentTodo(item)}>{item.title} </p>
 
                   <div className="item__content">
 
