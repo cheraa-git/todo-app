@@ -1,30 +1,20 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import axiosTodo from '../axios-todo'
-import { Todo } from '../interfaces'
-import { AppDispatch, RootState } from '../store'
-import { getDatabase, ref, get, child} from "firebase/database";
-import {getFirestore} from 'firebase/firestore'
-
-export const fetchTodos_ = (uid: string) => (dispatch: AppDispatch) => {
-  const db = getFirestore()
+import { editTodoPayload, Todo } from '../interfaces'
+import { RootState } from '../store'
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"
+import { setTodo, setTodoError, setTodoLoading } from "../slices/todoSlice"
 
 
-  // const dbRef = ref(getDatabase())
-  // get(child(dbRef, `${uid}/todos`))
-  //
-  //   .then((snapshot) => {
-  //     console.log(snapshot.val())
-  //   })
-  //   .catch((err) => console.log(err))
-
-}
-
+/**
+ * Fetching todos from firebase
+ * @return {Todo[]} - todo list
+ */
 export const fetchTodos = createAsyncThunk('todo/fetchTodos', async (_: void, { getState }) => {
   const category = (getState() as RootState).todo.category
   const uid = (getState() as RootState).auth.uid
 
   let filter = ''
-
   if (category === 'active') {
     filter = '?orderBy="done"&equalTo=false'
   } else if (category === 'completed') {
@@ -40,18 +30,81 @@ export const fetchTodos = createAsyncThunk('todo/fetchTodos', async (_: void, { 
 })
 
 
+/**
+ * Adding new to-do to firebase
+ * @param {{title: string}} payload - title for the new to-do
+ * @return {Todo} - new to-do
+ */
 export const addTodo = createAsyncThunk('todo/postTodo', async ({ title }: { title: string; }, { getState }) => {
   const { uid } = (getState() as RootState).auth
   const response = await axiosTodo.post(`/${uid}/todos.json`, { title, done: false })
   return { id: response.data.name, title, done: false } as Todo
 })
 
-export const setTodoStatus = createAsyncThunk('todo/setTodoStatus', async (todo: Todo, { getState }) => {
+
+/**
+ * Editing data in existing to-do
+ * @param {editTodoPayload} payload
+ */
+export const editTodo = createAsyncThunk('todo/editTodo', async ({ todo, flags }: editTodoPayload, {
+  getState,
+  dispatch
+}) => {
   const { uid } = (getState() as RootState).auth
-  const response = await axiosTodo.patch(`/${uid}/todos/${todo.id}.json`, { done: !todo.done })
-  return { ...todo, done: response.data.done } as Todo
+  const storage = getStorage()
+
+  if (flags && flags.isImgDelete) {
+    const storageRef = ref(storage, todo.image?.storagePath)
+    todo.image = null
+    dispatch(setTodoLoading(true))
+    deleteObject(storageRef)
+      .then(() => {
+        dispatch(setTodoLoading(false))
+      })
+      .catch((error) => {
+        dispatch(setTodoError(error.message))
+        console.log('delete img error:', error)
+      })
+  }
+  if (flags && flags.addImg) {
+    const file = flags.addImg
+    const filePath = `images/${todo.id}-${new Date().getTime()}.${file.name}`
+    const storageRef = ref(storage, filePath)
+    dispatch(setTodoLoading(true))
+    uploadBytes(storageRef, flags.addImg)
+      .then(({ ref }) => {
+        getDownloadURL(storageRef)
+          .then((url) => {
+            axiosTodo.patch(`/${uid}/todos/${todo.id}.json`, {
+              ...todo,
+              id: undefined,
+              image: { url, title: file.name, storagePath: ref.fullPath }
+            })
+              .then(({ data }) => {
+                dispatch(setTodo({ ...data, id: todo.id } as Todo))
+              })
+          })
+          .catch((error) => {
+            dispatch(setTodoError(error.message))
+            console.log(error)
+          })
+      })
+      .catch((error) => {
+        dispatch(setTodoError(error.message))
+        console.log(error)
+      })
+  } else {
+    axiosTodo.patch(`/${uid}/todos/${todo.id}.json`, { ...todo, id: undefined, })
+      .then(({ data }) => {
+        dispatch(setTodo({ ...data, id: todo.id } as Todo))
+      })
+  }
+
 })
 
+/**
+ * deleting completed tasks from firebase
+ */
 export const clearCompletedTodos = createAsyncThunk(
   'todo/clear/CompletedTodos',
   async (_, { getState, rejectWithValue }) => {
@@ -69,3 +122,5 @@ export const clearCompletedTodos = createAsyncThunk(
     }
 
   })
+
+

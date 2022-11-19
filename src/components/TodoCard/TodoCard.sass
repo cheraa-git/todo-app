@@ -1,114 +1,192 @@
+
 .card
-    background-color: #fff
-    box-shadow: 0 0 4px 1px rgba(99, 99, 99, 0.2)
+  background-color: #fff
+  box-shadow: 0 0 4px 1px rgba(99, 99, 99, 0.2)
 
-    &__input
-        display: flex
-        width: 100%
-        box-sizing: border-box
-        padding: .25rem
-        align-items: center
-        border-bottom: 2px solid #e6e6e6
+  &__input
+    display: flex
+    width: 100%
+    box-sizing: border-box
+    padding: .25rem
+    align-items: center
+    border-bottom: 2px solid #e6e6e6
 
-        input
-            padding-left: .5rem
-            outline: none
-            border: none
+    input
+      padding-left: .5rem
+      outline: none
+      border: none
 
-            &::placeholder
-                color: #E6E6E6
-                font-style: italic
-        i
-            margin: .25rem
-            color: #E6E6E6
-            &:hover
-                color: #b2b2b2
-                cursor: pointer
+      &::placeholder
+        color: #E6E6E6
+        font-style: italic
 
-    &__loader
-        position: absolute
+    i
+      margin: .25rem
+      color: #E6E6E6
 
-    &__items
-        box-sizing: border-box
-        overflow: scroll
-        max-height: 60vh
+      &:hover
+        color: #b2b2b2
+        cursor: pointer
 
-    &__footer
-        display: flex
-        height: 2.5rem
-        border-top: 2px solid #e6e6e6
-        font-size: 1rem
-        align-items: center
-        justify-content: space-around
-        
-        & > div
-            display: flex
-            justify-content: space-evenly
+  &__loader
+    position: absolute
 
-        button
-            background: #fff
-            border: 1px solid #E6DAD8
-            height: 1.8rem
-            border-radius: 1rem
-            color: #E6DAD8
-            transition: all .2s ease-out
-            margin-left: .5rem
-            &:hover
-                color: #aba19f
-                border: 1px solid #aba19f
-            &:active
-                background: #f6f6f6
-                border: 1px solid #ccc
-
-        .disabled
-            opacity: .5
-            &:hover
-                color: #E6DAD8
-                border: 1px solid #E6DAD8
-            &:active
-                background: #fff
-                border: 1px solid #E6DAD8
+  &__items
+    box-sizing: border-box
+    overflow: scroll
+    max-height: 60vh
 
     .item
+      display: flex
+      border-bottom: 1px solid #EDEDED
+      align-items: center
+      animation: item .3s ease-in 1 alternate 0s forwards
+      transition: background .2s ease-out
+
+
+      p
+        margin: .5rem 0 0 .5rem
+        color: #4D4D4D
+        max-width: 90%
+        cursor: pointer
+
+        &:hover
+          text-decoration: underline solid #E6DAD8 2px
+
+      > i
+        color: #EEEEEE
+        margin: .25rem
+        transition: all .3s ease-out
+
+        &:hover
+          color: #b2b2b2
+          cursor: pointer
+
+      &__content
         display: flex
-        border-bottom: 1px solid #EDEDED
-        align-items: center
-        animation: item .4s ease-in 1 alternate 0s forwards
+        color: #4d4d4d
+        font-size: 14px
 
-        p
-            margin: .5rem 0 .5rem .5rem
-            color: #4D4D4D
-            max-width: 90%
-
-        i
-            color: #EEEEEE
-            margin: .25rem
-            transition: all .3s ease-out
-            &:hover
-                color: #b2b2b2
-                cursor: pointer
+        span
+          margin-left: .5rem
+          list-style: circle
 
     .completed
-        p
-            text-decoration: line-through
-            color: #D9D9D9
-        i
-            color: #88BEAF
+      p
+        text-decoration: line-through
+        color: #D9D9D9
 
-            &:hover
-                opacity: .5
+      i
+        color: #88BEAF
 
-    .current
+        &:hover
+          opacity: .5
+
+      span
+        color: #a2a2a2
+
+    .overdue
+      background: #fffbf3
+
+      .bi-calendar
+        text-decoration: line-through #9a853f
+
+  &__footer
+    display: flex
+    height: 2.5rem
+    border-top: 2px solid #e6e6e6
+    font-size: 1rem
+    align-items: center
+    justify-content: space-around
+
+    & > div
+      display: flex
+      justify-content: space-evenly
+
+    button
+      background: #fff
+      border: 1px solid #E6DAD8
+      height: 1.8rem
+      border-radius: 1rem
+      color: #E6DAD8
+      transition: all .2s ease-out
+      margin-left: .5rem
+
+      &:hover
         color: #aba19f
         border: 1px solid #aba19f
 
-@keyframes item
-    0%
-        transform: translateX(-100px)
-        visibility: hidden
-    // 50%
-    //     background: red
-    100%
-        transform: translateX(0px)
-        visibility: visible
+      &:active
+        background: #f6f6f6
+        border: 1px solid #ccc
 
+    .disabled
+      opacity: .5
+
+      &:hover
+        color: #E6DAD8
+        border: 1px solid #E6DAD8
+
+      &:active
+        background: #fff
+        border: 1px solid #E6DAD8
+
+
+  .current
+    color: #aba19f
+    border: 1px solid #aba19f
+
+
+@keyframes item
+  0%
+    opacity: 0
+
+  100%
+    opacity: 1
+
+
+.item-config
+  background: #fff
+  box-shadow: 0 0 4px 1px rgba(99, 99, 99, 0.2)
+  padding: 1rem
+
+  p
+    margin: 0
+
+  &__input
+    display: flex
+    align-content: center
+    box-shadow: 1px 0 100px 0 rgba(230, 218, 216, 0.51)
+    margin-bottom: 1rem
+
+    input
+      outline: none
+      width: 100%
+      border: none
+      font-size: 18px
+
+    i
+      box-shadow: 0 0 4px 1px rgba(99, 99, 99, 0.2)
+      cursor: pointer
+      transition: opacity .2s ease-out
+
+      &:hover
+        opacity: .7
+
+
+  &__file
+    .image-label
+      font-size: 15px
+    .image
+      width: 100%
+
+  &__footer
+    display: flex
+    justify-content: space-between
+
+    button
+      font-size: 16px
+      border-radius: 5px
+      border-color: #ccc
+      border-width: 1px
+      background: #fff

@@ -3,6 +3,11 @@ import { clearUser, setAuthLoading, setError, setUser } from "../slices/authSlic
 import { AppDispatch } from "../store"
 
 
+/**
+ * Sing in with email and password
+ * @param email
+ * @param password
+ */
 export const loginUser = (email: string, password: string) => (dispatch: AppDispatch) => {
   const auth = getAuth()
   dispatch(setAuthLoading(true))
@@ -16,6 +21,9 @@ export const loginUser = (email: string, password: string) => (dispatch: AppDisp
     })
 }
 
+/**
+ * log out of the current authorization account
+ */
 export const logoutUser = () => (dispatch: AppDispatch) => {
   dispatch(setAuthLoading(true))
   getAuth().signOut()
@@ -23,6 +31,11 @@ export const logoutUser = () => (dispatch: AppDispatch) => {
     .catch((err) => console.log(err))
 }
 
+/**
+ * Sing up with email and password
+ * @param email
+ * @param password
+ */
 export const registerUser = (email: string, password: string) => (dispatch: AppDispatch) => {
   const auth = getAuth()
   dispatch(setAuthLoading(true))

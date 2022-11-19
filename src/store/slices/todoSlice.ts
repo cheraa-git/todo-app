@@ -1,5 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit'
-import { addTodo, clearCompletedTodos, fetchTodos, setTodoStatus } from '../actions/todoActions'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { addTodo, clearCompletedTodos, fetchTodos } from '../actions/todoActions'
 import { Todo } from '../interfaces'
 
 interface todoState {
@@ -20,14 +20,54 @@ export const todoSlice = createSlice({
   name: 'todo',
   initialState,
   reducers: {
-    setLoading: (state) => {
-      state.loading = !state.loading
+    /**
+     * Set a to-do loading
+     * @param state - the parameter is passed automatically
+     * @param {boolean} payload - true for start loading, false for end loading
+     */
+    setTodoLoading: (state, {payload}: PayloadAction<boolean>) => {
+      state.loading = payload
     },
-    setTodoCategory: (state, { payload }) => {
+
+    /**
+     * Set a to-do error
+     * @param state - the parameter is passed automatically
+     * @param {string} payload - error message
+     */
+    setTodoError: (state, { payload }: PayloadAction<string>) => {
+      state.error = payload
+      state.loading = false
+    },
+
+    /**
+     * Set a current to-do category
+     * @param state - the parameter is passed automatically
+     * @param payload - current category
+     */
+    setTodoCategory: (state, { payload }: PayloadAction<todoState['category']>) => {
       state.category = payload
     },
-    hideTodo: (state, { payload }) => {
 
+    /**
+     * Hide the to-do by deleting it from the local redux storage
+     * @param state - the parameter is passed automatically
+     * @param payload - to-do item
+     */
+    hideTodo: (state, { payload }: PayloadAction<Todo>) => {
+      if (state.category !== 'all') {
+        state.todos = state.todos.filter(todo => todo.id !== payload.id)
+      }
+    },
+
+    /**
+     * Add a new to-do to the redux storage
+     * @param state - the parameter is passed automatically
+     * @param payload - to-do item
+     */
+    setTodo: (state, {payload}: PayloadAction<Todo>) => {
+      // todo: after setting the todo status, hide the todo (if category !== 'all') after 5 seconds of timeout
+      state.todos = state.todos.map(todo => todo.id === payload.id ? { ...todo, ...payload } : todo)
+      state.loading = false
     }
   },
   extraReducers(builder) {
@@ -36,7 +76,9 @@ export const todoSlice = createSlice({
       state.loading = true
     })
     builder.addCase(addTodo.fulfilled, (state, { payload }) => {
-      state.todos.push(payload)
+      if (state.category !== 'completed') {
+        state.todos.push(payload)
+      }
       state.loading = false
     })
     builder.addCase(addTodo.rejected, (state, { error }) => {
@@ -59,40 +101,25 @@ export const todoSlice = createSlice({
       state.loading = false
     })
 
-    // SET TODO_STATUS
-    builder.addCase(setTodoStatus.pending, state => {
+
+    // CLEAR COMPLETED TODOS
+    builder.addCase(clearCompletedTodos.pending, state => {
       state.loading = true
     })
-    builder.addCase(setTodoStatus.fulfilled, (state, { payload }) => {
-
-      // TODO: after setting the todo status, hide the todo (if category !== 'all') after 5 seconds of timeout
-
-      state.todos.forEach(todo => {
-        if (todo.id === payload.id) {
-          todo.done = payload.done
-        }
-      })
+    builder.addCase(clearCompletedTodos.fulfilled, (state, { payload }) => {
+      state.todos = state.todos.filter(todo => !payload?.includes(todo.id))
       state.loading = false
-      // setTimeout(() => {
-      if (state.category !== 'all') {
-        state.todos = state.todos.filter(todo => todo.id !== payload.id)
-      }
-      // }, 2000)
     })
-    builder.addCase(setTodoStatus.rejected, (state, { error }) => {
-      state.error = 'Fetch todos error: ' + error.message
+    builder.addCase(clearCompletedTodos.rejected, (state, { error }) => {
+      state.error = 'Clear completed todos error: ' + error.message
       console.log('Fetch todos error:', error)
       state.loading = false
     })
 
-    // CLEAR COMPLETED TODOS
-    builder.addCase(clearCompletedTodos.fulfilled, (state, { payload }) => {
-      state.todos = state.todos.filter(todo => !payload?.includes(todo.id))
-    })
   },
 
 })
 
-export const { setLoading, setTodoCategory } = todoSlice.actions
+export const { setTodoLoading, setTodoCategory, hideTodo, setTodoError, setTodo } = todoSlice.actions
 
 export default todoSlice.reducer
